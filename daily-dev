@@ -1,0 +1,40 @@
+const axios = require('axios');
+const cheerio = require('cheerio');
+
+const url = 'YOUR_PAGE_URL_HERE'; // Replace with the actual page URL
+
+axios.get(url)
+  .then((response) => {
+    const $ = cheerio.load(response.data);
+
+    const articles = $('div.grid.grid-cols-1 article');
+    const results = [];
+
+    articles.each((index, article) => {
+      // Post title and link
+      const linkTag = $(article).find('a[title][href]');
+      const title = linkTag.attr('title');
+      const href = linkTag.attr('href');
+
+      // Find the image tag with type="post" and srcset
+      const postImgTag = $(article).find('img[type="post"][srcset]');
+      const postImgSrc = postImgTag.attr('src');
+
+      results.push({
+        title,
+        url: href,
+        image: postImgSrc,
+      });
+    });
+
+    // Output results
+    results.forEach((r) => {
+      console.log(`Title: ${r.title}`);
+      console.log(`URL: ${r.url}`);
+      console.log(`Image: ${r.image}`);
+      console.log("-".repeat(40));
+    });
+  })
+  .catch((error) => {
+    console.error('Error fetching the page:', error);
+  });
