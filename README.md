@@ -14,6 +14,7 @@ npm install
 3. Create a .env file (optional) or edit the URL directly in scraper.js.
 
 ## 🚀 Usage
+
 Update the postUrl inside scraper.js with your desired Daily.dev post URL.
 
 Then run:
