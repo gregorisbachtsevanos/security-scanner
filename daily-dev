@@ -3,10 +3,10 @@ const fs = require('fs');
 
 const url = '';
 const loginUrl = '';
-const email = ''; // Replace with your email
-const password = ' '; // Replace with your password
+const email = '';
+const password = '';
 
-(async () => {
+async () => {
   const browser = await puppeteer.launch({ headless: 'new' });
   const page = await browser.newPage();
   await page.setViewport({ width: 1280, height: 800 });
