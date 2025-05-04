@@ -1,36 +1,65 @@
-const axios = require('axios');
-const cheerio = require('cheerio');
+const puppeteer = require('puppeteer');
 const fs = require('fs');
-const path = require('path');
 
-const url = 'PAGE_URL';
+const url = '';
+const loginUrl = '';
+const email = ''; // Replace with your email
+const password = ' '; // Replace with your password
 
-const scrapePage = async () => {
-  try {
-    const { data } = await axios.get(url);
-    const $ = cheerio.load(data);
+(async () => {
+  const browser = await puppeteer.launch({ headless: 'new' });
+  const page = await browser.newPage();
+  await page.setViewport({ width: 1280, height: 800 });
 
-    const results = $('div.grid.grid-cols-1 article').map((_, article) => {
-      const $article = $(article);
-      const linkTag = $article.find('a[title][href]');
-      const postImgTag = $article.find('img[type="post"][srcset]');
+  await page.goto(loginUrl, { waitUntil: 'networkidle2' });
 
-      return {
-        title: linkTag.attr('title') || null,
-        url: linkTag.attr('href') || null,
-        image: {
-          src: postImgTag.attr('src') || null,
-          srcset: postImgTag.attr('srcset') || null,
-        },
-      };
-    }).get();
+  await page.type('input[name="email"]', email, { delay: 100 });
+  await page.type('input[name="password"]', password, { delay: 100 });
+  await page.click('button[type="submit"]');
 
-    const outputPath = path.join(__dirname, 'posts.json');
-    fs.writeFileSync(outputPath, JSON.stringify(results, null, 2));
-    console.log(`Scraped data saved to ${outputPath}`);
-  } catch (error) {
-    console.error('Error fetching the page:', error.message);
-  }
-};
+  await page.waitForNavigation({ waitUntil: 'networkidle2' });
 
-scrapePage();
+  await page.goto(url, { waitUntil: 'networkidle2' });
+
+  await page.waitForSelector('article', { timeout: 10000 }).catch(() => {
+    console.warn('⚠️ No articles loaded in time.');
+  });
+
+  await page.evaluate(async () => {
+    await new Promise(resolve => {
+      let totalHeight = 0;
+      const distance = 100;
+      const timer = setInterval(() => {
+        const scrollHeight = document.body.scrollHeight;
+        window.scrollBy(0, distance);
+        totalHeight += distance;
+
+        if (totalHeight >= scrollHeight) {
+          clearInterval(timer);
+          resolve();
+        }
+      }, 100);
+    });
+  });
+
+  const results = await page.evaluate(() => {
+    const articles = Array.from(document.querySelectorAll('article'));
+    return articles.map(article => {
+      const linkEl = article.querySelector('a[title][href]');
+      const imgEl = article.querySelector('img[type="post"][srcset]');
+
+      return linkEl && imgEl
+        ? {
+            title: linkEl.getAttribute('title'),
+            url: linkEl.getAttribute('href'),
+            image: imgEl.getAttribute('src'),
+          }
+        : null;
+    }).filter(Boolean);
+  });
+
+  fs.writeFileSync('posts.json', JSON.stringify(results, null, 2));
+  console.log(`✅ Saved ${results.length} posts to posts.json`);
+
+  await browser.close();
+})();
