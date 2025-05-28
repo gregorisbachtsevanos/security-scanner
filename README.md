@@ -34,5 +34,3 @@ The script will log the srcset and src of the main post image with class:
 • Axios\
 • Cheerio
 
-📄 License
-MIT
