@@ -3,13 +3,17 @@
 > For authorized use only. Scan systems you own or are permitted to test.
 
 ## Install (dev)
+```
 pip install -e .
+```
 
 ## CLI
+```
 secscan ports example.com
 secscan http https://example.com --json-out results/http.json
 secscan dirbust https://example.com --wordlist wordlists/tiny.txt --csv-out results/dirs.csv
 secscan scan example.com --out-json results/full.json
+```
 
 ## Notes
 - Port scan is asynchronous but still polite (default timeouts).
