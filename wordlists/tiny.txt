@@ -1,0 +1,10 @@
+# Tiny wordlist for quick checks (optional)
+admin
+login
+backup
+old
+test
+.git
+.env
+phpinfo.php
+server-status
