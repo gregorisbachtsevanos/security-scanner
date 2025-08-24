@@ -1,36 +1,54 @@
-# Daily.dev Post Image Scraper
+# SecScan – Security Scanner Tool
 
-A simple Node.js script that fetches the main post image from a Daily.dev article URL using Cheerio and Axios.
+> For authorized use only. Scan systems you own or are permitted to test.
 
-## 📦 Setup
+## Install (dev)
+pip install -e .
 
-1. Clone the repo or create a new project.
-2. Install dependencies:
+## CLI
+secscan ports example.com
+secscan http https://example.com --json-out results/http.json
+secscan dirbust https://example.com --wordlist wordlists/tiny.txt --csv-out results/dirs.csv
+secscan scan example.com --out-json results/full.json
 
+## Notes
+- Port scan is asynchronous but still polite (default timeouts).
+- HTTP checks are passive: headers, TLS, robots, sitemap.
+- Dirbust is non-destructive (GET only, no payloads).
+
+## Dockerfile (optional)
 ```
-npm install
-```
-
-3. Create a .env file (optional) or edit the URL directly in scraper.js.
-
-## 🚀 Usage
-
-Update the postUrl inside scraper.js with your desired Daily.dev post URL.
-
-Then run:
-
-```
-npm start
-```
-
-The script will log the srcset and src of the main post image with class:
-
-```
-<img class="mobileXXL:self-start mt-4 w-full mobileXL:w-60 rounded-12 h-40 object-cover" ... />
+FROM python:3.11-slim
+WORKDIR /app
+COPY . .
+RUN pip install --no-cache-dir -e .
+ENTRYPOINT ["secscan"]
 ```
 
-## 🛠 Dependencies
+**Run examples:**
+```
+docker build -t secscan .
+docker run --rm secscan http https://example.com
+```
 
-• Axios\
-• Cheerio
+## How to Use
 
+**Install in dev mode:**
+```\
+pip install -e .
+```
+
+**Run scans:**
+```
+# Ports
+secscan ports example.com --ports 1-1024
+
+# HTTP
+secscan http https://example.com --json-out results/http.json
+
+# Dirbust with wordlist
+secscan dirbust https://example.com --wordlist wordlists/tiny.txt --csv-out results/dirs.csv
+
+# Combined
+secscan scan example.com --out-json results/full.json
+```
